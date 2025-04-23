@@ -37,6 +37,8 @@ jobs:
       - name: Start backend
         working-directory: ./backend
         run: nohup node server.js &
+      - name: Wait for backend
+        run: npx wait-on tcp:5000
       - name: Seed database with test user
         working-directory: ./backend
         run: node seedUser.js
@@ -46,13 +48,10 @@ jobs:
       - name: Start frontend
         working-directory: ./frontend
         run: |
-          npm start &
-      - name: Wait for frontend to be ready
+          npm install -g serve
+          nohup serve -s build -l 3000 &
+      - name: Wait for frontend
         run: npx wait-on http://localhost:3000
       - name: Run Playwright tests
-        run: >
-          sudo apt-get update
-
-          sudo apt-get install -y xvfb
-
-          xvfb-run --auto-servernum --server-args='-screen 0 1024x768x24' npx playwright test --project=chromium
+        run: |
+          xvfb-run --auto-servernum npx playwright test --project=chromium

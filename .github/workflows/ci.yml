@@ -21,9 +21,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: npm
       - name: Install root dependencies
         run: npm install
-      - name: Install Playwright in root
+      - name: Install Playwright
         run: |
           npm install -D @playwright/test
           npx playwright install --with-deps
@@ -32,37 +33,44 @@ jobs:
         run: |
           npm install
           echo "PORT=5000" >> .env
-          echo "MONGO_URI=mongodb://127.0.0.1:27017/mywebapp" >> .env
+          echo "MONGO_URI=mongodb://localhost:27017/mywebapp" >> .env
           echo "JWT_SECRET=yourtestsecret" >> .env
       - name: Start backend
         working-directory: ./backend
-        run: nohup node server.js &
+        run: |
+          nohup node server.js > backend.log 2>&1 &
+          sleep 5
+          cat backend.log
       - name: Wait for backend
-        run: npx wait-on tcp:5000
-      - name: Seed database with test user
+        run: |
+          npx wait-on tcp:5000
+          curl -v http://localhost:5000 || true
+      - name: Seed database
         working-directory: ./backend
         run: node seedUser.js
       - name: Set up frontend
         working-directory: ./frontend
         run: |
           npm install
-          # Create React App needs this to allow external host access
           echo "HOST=0.0.0.0" >> .env
+          echo "PORT=3000" >> .env
+          echo "BROWSER=none" >> .env
+          echo "FAST_REFRESH=false" >> .env
       - name: Start frontend
         working-directory: ./frontend
         run: |
-          # Install net-tools for debugging
+          # Install network tools for debugging
           sudo apt-get update && sudo apt-get install -y net-tools
-          # Start React app with logging
           nohup npm start > frontend.log 2>&1 &
-          # Wait and debug
-          sleep 10
+          sleep 15  # Increased wait time for React dev server
           cat frontend.log
-          netstat -tulpn | grep 3000 || true
-          curl -v http://127.0.0.1:3000 || true
+          netstat -tulnp | grep 3000 || true
+          curl -v http://localhost:3000 || true
       - name: Wait for frontend
         run: |
-          npx wait-on --timeout 60000 --interval 1000 http://127.0.0.1:3000
+          npx wait-on --timeout 120000 --interval 2000 http://localhost:3000
+          curl -v http://localhost:3000 || true
       - name: Run Playwright tests
+        timeout-minutes: 10
         run: |
           xvfb-run --auto-servernum npx playwright test --project=chromium

@@ -46,7 +46,9 @@ jobs:
       - name: Start frontend
         working-directory: ./frontend
         run: |
-          nohup npm start &
+          npm start &
+      - name: Wait for frontend to be ready
+        run: npx wait-on http://localhost:3000
       - name: Run Playwright tests
         run: >
           sudo apt-get update

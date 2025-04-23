@@ -23,6 +23,10 @@ jobs:
           node-version: 18
       - name: Install root dependencies
         run: npm install
+      - name: Install Playwright in root
+        run: |
+          npm install -D @playwright/test
+          npx playwright install --with-deps
       - name: Set up backend
         working-directory: ./backend
         run: |
@@ -36,8 +40,6 @@ jobs:
       - name: Set up frontend
         working-directory: ./frontend
         run: npm install
-      - name: Install Playwright
-        run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: >
           sudo apt-get update

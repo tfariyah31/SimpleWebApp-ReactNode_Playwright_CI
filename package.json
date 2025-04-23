@@ -26,6 +26,6 @@
     "react-router-dom": "^7.3.0"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@playwright/test": "^1.42.1",
   }
 }

@@ -42,14 +42,16 @@ jobs:
       - name: Seed database with test user
         working-directory: ./backend
         run: node seedUser.js
-      - name: Set up frontend
+      - name: Build frontend
         working-directory: ./frontend
-        run: npm install
-      - name: Start frontend
-        working-directory: ./frontend
+        run: npm run build
+      - name: Start frontend server
         run: |
           npm install -g serve
-          nohup serve -s build -l 3000 &
+          nohup serve -s frontend/build -l 3000 > frontend.log 2>&1 &
+          cat frontend.log
+          sleep 3
+          curl -v http://localhost:3000 || true
       - name: Wait for frontend
         run: npx wait-on http://localhost:3000
       - name: Run Playwright tests

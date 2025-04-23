@@ -42,18 +42,27 @@ jobs:
       - name: Seed database with test user
         working-directory: ./backend
         run: node seedUser.js
-      - name: Build frontend
+      - name: Set up frontend
         working-directory: ./frontend
-        run: npm run build
-      - name: Start frontend server
         run: |
-          npm install -g serve
-          nohup serve -s frontend/build -l 3000 > frontend.log 2>&1 &
+          npm install
+          # Create React App needs this to allow external host access
+          echo "HOST=0.0.0.0" >> .env
+      - name: Start frontend
+        working-directory: ./frontend
+        run: |
+          # Install net-tools for debugging
+          sudo apt-get update && sudo apt-get install -y net-tools
+          # Start React app with logging
+          nohup npm start > frontend.log 2>&1 &
+          # Wait and debug
+          sleep 10
           cat frontend.log
-          sleep 3
+          netstat -tulpn | grep 3000 || true
           curl -v http://localhost:3000 || true
       - name: Wait for frontend
-        run: npx wait-on http://localhost:3000
+        run: |
+          npx wait-on --timeout 60000 --interval 1000 http://localhost:3000
       - name: Run Playwright tests
         run: |
           xvfb-run --auto-servernum npx playwright test --project=chromium

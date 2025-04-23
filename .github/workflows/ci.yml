@@ -25,7 +25,8 @@ jobs:
       - name: Install root dependencies
         run: npm install
       - name: Install Playwright
-        run: npx playwright install --with-deps
+        run: |
+          npx playwright install --with-deps
       - name: Set up backend
         working-directory: ./backend
         run: |
@@ -49,8 +50,20 @@ jobs:
       - name: Set up frontend
         working-directory: ./frontend
         run: |
-          npm install
+          # Clean install with proper permissions
+          rm -rf node_modules package-lock.json
+          npm install --unsafe-perm
+          echo "HOST=0.0.0.0" >> .env
+          echo "PORT=3000" >> .env
           echo "GENERATE_SOURCEMAP=false" >> .env
+          echo "INLINE_RUNTIME_CHUNK=false" >> .env
+      - name: Verify frontend setup
+        working-directory: ./frontend
+        run: |
+          # Check react-scripts exists and has execute permissions
+          ls -la node_modules/.bin/react-scripts
+          chmod +x node_modules/.bin/react-scripts
+          npm list react-scripts
       - name: Build frontend
         working-directory: ./frontend
         run: npm run build

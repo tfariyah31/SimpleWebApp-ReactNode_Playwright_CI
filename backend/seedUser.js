@@ -13,12 +13,12 @@ const seed = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     
 
-    const hashedPassword = await bcrypt.hash('password', 10);
-
     await User.create([
       {
-        username: 'usera',
-        password: hashedPassword,
+        name : 'usera',
+        username: 'User A',
+        email : 'usera@gmail.com',
+        password: 'password',
       },
     ]);
 

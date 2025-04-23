@@ -25,9 +25,7 @@ jobs:
       - name: Install root dependencies
         run: npm install
       - name: Install Playwright
-        run: |
-          npm install -D @playwright/test
-          npx playwright install --with-deps
+        run: npx playwright install --with-deps
       - name: Set up backend
         working-directory: ./backend
         run: |
@@ -52,25 +50,19 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          echo "HOST=0.0.0.0" >> .env
-          echo "PORT=3000" >> .env
-          echo "BROWSER=none" >> .env
-          echo "FAST_REFRESH=false" >> .env
-      - name: Start frontend
+          echo "GENERATE_SOURCEMAP=false" >> .env
+      - name: Build frontend
         working-directory: ./frontend
+        run: npm run build
+      - name: Serve frontend
         run: |
-          # Install network tools for debugging
-          sudo apt-get update && sudo apt-get install -y net-tools
-          nohup npm start > frontend.log 2>&1 &
-          sleep 15  # Increased wait time for React dev server
+          npm install -g serve
+          nohup serve -s frontend/build -l 3000 > frontend.log 2>&1 &
+          sleep 5
           cat frontend.log
-          netstat -tulnp | grep 3000 || true
           curl -v http://localhost:3000 || true
       - name: Wait for frontend
-        run: |
-          npx wait-on --timeout 120000 --interval 2000 http://localhost:3000
-          curl -v http://localhost:3000 || true
+        run: npx wait-on --timeout 60000 tcp:3000
       - name: Run Playwright tests
         timeout-minutes: 10
-        run: |
-          xvfb-run --auto-servernum npx playwright test --project=chromium
+        run: xvfb-run --auto-servernum npx playwright test --project=chromium

@@ -22,18 +22,35 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Username and password required'
+    });
+  }
   try {
     const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    //if (!user) return res.status(400).json({ success: false, message: 'Invalid credentials' });
+
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials', attemptsLeft: req.rateLimit.remaining });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    //if (!isMatch) return res.status(400).json({ success: false, message: 'Invalid credentials' });
 
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials', });
+    if (!isMatch) return res.status(401).json({ success: false, message: 'Invalid credentials', attemptsLeft: req.rateLimit.remaining });
+    if (user.isBlocked) {
+      return res.status(403).json({success: false, message: "Your account is blocked. Please contact support." });
+    }
     const payload = { userId: user.id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token });
+    return res.json({ success: true,token });
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      
+    });
   }
 };

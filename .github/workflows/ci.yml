@@ -26,7 +26,9 @@ jobs:
         run: npm install
       - name: Install Playwright
         run: |
+          npm install -D @playwright/test
           npx playwright install --with-deps
+          npx playwright --version
       - name: Set up backend
         working-directory: ./backend
         run: |

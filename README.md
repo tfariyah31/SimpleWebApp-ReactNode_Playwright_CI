@@ -25,8 +25,6 @@ This is a simple web application with a **React frontend** and a **Node.js backe
   - MongoDB (for database)
   - Mongoose (for MongoDB object modeling)
   - JWT (for authentication)
-- **Tools**:
-  - Concurrently (to run frontend and backend simultaneously)
 
 ---
 
@@ -45,8 +43,8 @@ Follow these steps to set up and run the project on your local machine.
 ### **1. Clone the Repository**
 Clone the repository to your local machine using the following command:
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/tfariyah31/SimpleWebApp.git
+cd SimpleWebApp
 ```
 
 ---
@@ -92,24 +90,6 @@ cd your-repo-name
 
 ---
 
-### **4. Run Both Frontend and Backend Simultaneously**
-To run both the frontend and backend servers simultaneously, use `concurrently`:
-1. Navigate to the root directory of the project:
-   ```bash
-   cd ..
-   ```
-2. Install `concurrently` (if not already installed):
-   ```bash
-   npm install concurrently --save-dev
-   ```
-3. Start both servers:
-   ```bash
-   npm start
-   ```
-   - The backend will run on `http://localhost:5000`.
-   - The frontend will run on `http://localhost:3000`.
-
----
 
 ## **Project Structure**
 ```
@@ -127,13 +107,42 @@ my-web-app/
 │   ├── src/             # React components and logic
 │   ├── package.json     # Frontend dependencies
 │   └── ...              # Other frontend files
+├── tests/
+│   ├── login.spec.js    # Playwright Test Script for login funcionality
 ├── package.json         # Root project dependencies
+├── playwright.config.js # Playwright Config
 └── README.md            # Project documentation
 ```
 
 ---
 
 ## **API Endpoints**
+- **POST /api/auth/register**: User registration.
+  - Request Body:  
+    ```json
+    {
+    "name": "Test User",
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "password"
+    }
+    ```
+  - Response:
+    ```json
+    {
+    "success": true,
+    "token": "your-token",
+    "user": {
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "username": "testuser",
+        "isBlocked": false,
+        "_id": "68098be763eeb1c7df1033d1",
+        "__v": 0
+   }
+   }
+  ```
+
 - **POST /api/auth/login**: User login.
   - Request Body:
     ```json

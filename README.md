@@ -1,31 +1,28 @@
-# **Simple Web Application with React Frontend and Node.js Backend**
+# **Simple Web Application with React + Node.js Web App with CI/CD & Playwright Automated Testing**
 
-This is a simple web application with a **React frontend** and a **Node.js backend**. It includes user authentication (login functionality) and a product list page. The backend uses Express.js and MongoDB, while the frontend is built with React and Material-UI.
+This is a full-stack web application with a **React frontend** and a **Node.js backend**, featuring **user authentication**, **product listing**, and **automated testing**. It is also integrated with **GitHub Actions** to automate build, deployment, and testing using **Playwright**.
 
 ---
 
 ## **Features**
-- **User Authentication**:
-  - Login functionality with JWT (JSON Web Token) for secure authentication.
-- **Product List**:
-  - Displays a list of products with details (name, description, image, and rating).
-- **Responsive Design**:
-  - Built with Material-UI for a clean and modern user interface.
+- 🔐 **User Authentication**  
+  - Login with JWT-based authentication  
+- 🛒 **Product List Page**  
+  - Displays product info (name, description, image, rating)  
+- 📱 **Responsive UI**  
+  - Styled with Material-UI (MUI)  
+- 🧪 **Automated Testing**  
+  - Automated with Playwright  
+- 🔁 **CI/CD Pipeline**  
+  - GitHub Actions pipeline for test automation and deployment  
 
 ---
 
 ## **Technologies Used**
-- **Frontend**:
-  - React
-  - Material-UI (MUI)
-  - Axios (for API calls)
-- **Backend**:
-  - Node.js
-  - Express.js
-  - MongoDB (for database)
-  - Mongoose (for MongoDB object modeling)
-  - JWT (for authentication)
-
+- **Frontend**: React, Material-UI, Axios  
+- **Backend**: Node.js, Express.js, MongoDB, Mongoose, JWT  
+- **Testing**: Playwright  
+- **CI/CD**: GitHub Actions 
 ---
 
 ## **Prerequisites**
@@ -184,6 +181,28 @@ my-web-app/
       }
     ]
     ```
+
+## **Automated Testing with Playwright**
+The app includes Playwright-based E2E tests located in the tests/ directory.
+Example: login.spec.js covers login functionality with real browser interactions.
+
+To run tests locally:
+
+```bash
+npx playwright test
+```
+
+
+## **CI/CD Workflow with GitHub Actions**
+The app includes a GitHub Actions workflow (.github/workflows/ci.yml) that:
+- 1. Triggers on push to main
+- 2. Spins up MongoDB with Docker
+- 3. Installs backend, frontend & Playwright dependencies
+- 4. Starts backend and seeds database
+- 5. Builds & serves the React frontend
+- 6. Waits for both servers to become available
+- 7. Executes Playwright tests in headless Chromium
+
 
 ---
 

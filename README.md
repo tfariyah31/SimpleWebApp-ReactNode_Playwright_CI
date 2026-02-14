@@ -5,15 +5,15 @@ This is a full-stack web application with a **React frontend** and a **Node.js b
 ---
 
 ## **Features**
-- 🔐 **User Authentication**  
+-  **User Authentication**  
   - Login with JWT-based authentication  
-- 🛒 **Product List Page**  
+-  **Product List Page**  
   - Displays product info (name, description, image, rating)  
-- 📱 **Responsive UI**  
+-  **Responsive UI**  
   - Styled with Material-UI (MUI)  
-- 🧪 **Automated Testing**  
+-  **Automated Testing**  
   - Automated with Playwright  
-- 🔁 **CI/CD Pipeline**  
+-  **CI/CD Pipeline**  
   - GitHub Actions pipeline for test automation and deployment  
 
 ---

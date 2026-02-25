@@ -5,16 +5,30 @@ This is a full-stack web application with a **React frontend** and a **Node.js b
 ---
 
 ## **Features**
--  **User Authentication**  
-  - Login with JWT-based authentication  
--  **Product List Page**  
-  - Displays product info (name, description, image, rating)  
--  **Responsive UI**  
-  - Styled with Material-UI (MUI)  
--  **Automated Testing**  
-  - Automated with Playwright  
--  **CI/CD Pipeline**  
-  - GitHub Actions pipeline for test automation and deployment  
+
+###  Security & Authentication
+
+- **User Authentication:** Secure login system using **JSON Web Tokens (JWT)** and **bcryptjs** for password hashing.
+    
+- **Request Protection:** Implemented **Helmet** to secure HTTP headers and **XSS-Clean** to prevent cross-site scripting attacks.
+
+- **Database Security:** Sanitizes user input with **express-mongo-sanitize** to prevent NoSQL injection.
+    
+- **Rate Limiting:** Protects against brute-force attacks by limiting repeated requests to APIs.
+    
+
+### Frontend & UI
+
+-   **Product Discovery:** A clean Product List Page displaying names, descriptions, ratings, and images.
+    
+-   **Responsive Design:** Fully mobile-responsive UI built with **Material-UI (MUI)**.
+    
+
+###  DevOps & Quality Assurance
+
+-   **Automated Testing:** End-to-end testing suite powered by **Playwright**.
+    
+-   **CI/CD Pipeline:** Integrated **GitHub Actions** for automated testing and seamless deployment.
 
 ---
 

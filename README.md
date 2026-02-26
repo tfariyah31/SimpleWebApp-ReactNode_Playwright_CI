@@ -1,107 +1,88 @@
-# **Simple Web Application with React + Node.js Web App with CI/CD & Playwright Automated Testing**
-
-This is a full-stack web application with a **React frontend** and a **Node.js backend**, featuring **user authentication**, **product listing**, and **automated testing**. It is also integrated with **GitHub Actions** to automate build, deployment, and testing using **Playwright**.
-
----
-
-## **Features**
-
-###  Security & Authentication
-
-- **User Authentication:** Secure login system using **JSON Web Tokens (JWT)** and **bcryptjs** for password hashing.
-    
-- **Request Protection:** Implemented **Helmet** to secure HTTP headers and **XSS-Clean** to prevent cross-site scripting attacks.
-
-- **Database Security:** Sanitizes user input with **express-mongo-sanitize** to prevent NoSQL injection.
-    
-- **Rate Limiting:** Protects against brute-force attacks by limiting repeated requests to APIs.
-    
-
-### Frontend & UI
-
--   **Product Discovery:** A clean Product List Page displaying names, descriptions, ratings, and images.
-    
--   **Responsive Design:** Fully mobile-responsive UI built with **Material-UI (MUI)**.
-    
-
-###  DevOps & Quality Assurance
-
--   **Automated Testing:** End-to-end testing suite powered by **Playwright**.
-    
--   **CI/CD Pipeline:** Integrated **GitHub Actions** for automated testing and seamless deployment.
+# Simple Web Application - React + Node.js
+A full-stack web application with a **React frontend** and **Node.js backend**, featuring user authentication, product listing, CI/CD automation, and end-to-end testing with Playwright.
 
 ---
 
-## **Technologies Used**
-- **Frontend**: React, Material-UI, Axios  
-- **Backend**: Node.js, Express.js, MongoDB, Mongoose, JWT  
-- **Testing**: Playwright  
-- **CI/CD**: GitHub Actions 
+## Features
+
+**Security & Authentication**
+- JWT-based login with `bcryptjs` password hashing
+- HTTP header protection via `Helmet` and XSS prevention via `xss-clean`
+- NoSQL injection prevention with `express-mongo-sanitize`
+- Rate limiting to guard against brute-force attacks
+
+**Frontend & UI**
+- Product List Page displaying names, descriptions, ratings, and images
+- Fully responsive UI built with Material-UI (MUI)
+
+**DevOps & Quality Assurance**
+- End-to-end test suite powered by Playwright
+- CI/CD pipeline via GitHub Actions for automated testing and deployment
+
 ---
 
-## **Prerequisites**
-Before running the project, ensure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- [MongoDB](https://www.mongodb.com/try/download/community) (or use MongoDB Atlas for a cloud database)
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| Frontend | React, Material-UI, Axios |
+| Backend | Node.js, Express.js, MongoDB, Mongoose, JWT |
+| Testing | Playwright |
+| CI/CD | GitHub Actions |
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v16 or higher
+- [MongoDB](https://www.mongodb.com/try/download/community) (local) or a [MongoDB Atlas](https://www.mongodb.com/atlas) cloud URI
 - [Git](https://git-scm.com/)
 
 ---
 
-## **Getting Started**
+## Getting Started
 
-Follow these steps to set up and run the project on your local machine.
+### 1. Clone the Repository
 
-### **1. Clone the Repository**
-Clone the repository to your local machine using the following command:
 ```bash
 git clone https://github.com/tfariyah31/SimpleWebApp.git
 cd SimpleWebApp
 ```
 
----
+### 2. Set Up the Backend
 
-### **2. Set Up the Backend**
-1. Navigate to the `backend` folder:
-   ```bash
-   cd backend
-   ```
-2. Install backend dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the `backend` folder and add the following environment variables:
-   ```env
-   PORT=5000
-   MONGO_URI=mongodb://localhost:27017/mywebapp
-   JWT_SECRET=mysecretkey
-   ```
-   - Replace `mongodb://localhost:27017/mywebapp` with your MongoDB connection string (e.g., MongoDB Atlas URI if using a cloud database).
-4. Start the backend server:
-   ```bash
-   node server.js
-   ```
-   The backend will run on `http://localhost:5000`.
+```bash
+cd backend
+npm install
+```
 
----
+Create a `.env` file in the `backend` folder:
 
-### **3. Set Up the Frontend**
-1. Navigate to the `frontend` folder:
-   ```bash
-   cd ../frontend
-   ```
-2. Install frontend dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the frontend development server:
-   ```bash
-   npm start
-   ```
-   The frontend will run on `http://localhost:3000`.
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/mywebapp
+JWT_SECRET=your_secret_key_here
+```
+
+> Replace `MONGO_URI` with your MongoDB Atlas connection string if using a cloud database. Use a strong, unique value for `JWT_SECRET` — never commit it to version control.
+
+Start the backend server:
+
+```bash
+node server.js
+```
+
+The backend will be available at `http://localhost:5001`.
+
+### 3. Set Up the Frontend
+
+```bash
+cd ../frontend
+npm install
+npm start
+```
+
+The frontend will be available at `http://localhost:3000`.
 
 ---
-
-
 ## **Project Structure**
 ```
 my-web-app/
@@ -132,40 +113,43 @@ my-web-app/
   - Request Body:  
     ```json
     {
-    "name": "Test User",
-    "username": "testuser",
-    "email": "testuser@example.com",
-    "password": "password"
+        "name": "Test User",
+        "email": "user@test.com",
+        "password": "password"
     }
     ```
   - Response:
     ```json
     {
-    "success": true,
-    "token": "your-token",
-    "user": {
-        "name": "Test User",
-        "email": "testuser@example.com",
-        "username": "testuser",
-        "isBlocked": false,
-        "_id": "68098be763eeb1c7df1033d1",
-        "__v": 0
-   }
-   }
-  ```
+        "success": true,
+        "message": "User registered successfully",
+        "id": "699fc2389d80a6b2843f2921",
+        "email": "newuser1772077623999@testmail.com",
+        "emailVerified": false,
+        "name": "TestUser",
+        "isBlocked": false
+    } 
+    ```
 
 - **POST /api/auth/login**: User login.
   - Request Body:
     ```json
     {
-      "username": "testuser",
+      "email": "user@test.com",
       "password": "testpassword"
     }
     ```
   - Response:
     ```json
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "success": true,
+        "accessToken": "your-token",
+        "refreshToken": "refresh-token",
+        "user": {
+            "id": "699f9838940ec12f1cbbea76",
+            "email": "user@test.com",
+            "name": "Test User"
+        }
     }
     ```
 
@@ -178,44 +162,46 @@ my-web-app/
     ```
   - Response:
     ```json
-    [
-      {
-        "_id": "65f8c8f1e4b0a1a2b3c4d5e6",
-        "name": "Product 1",
-        "description": "This is product 1",
-        "image": "https://via.placeholder.com/150",
-        "rating": 4.5
-      },
-      {
-        "_id": "65f8c8f1e4b0a1a2b3c4d5e7",
-        "name": "Product 2",
-        "description": "This is product 2",
-        "image": "https://via.placeholder.com/150",
-        "rating": 3.8
-      }
-    ]
+    {
+        "success": true,
+        "products": [
+            {
+                "name": "Product A",
+                "description": "desc",
+                "image": "image url",
+                "rating": 4.8,
+                "id": "6991383657d0c948e84dd8df"
+            },
+            {
+                "name": "Product B",
+                "description": "desc",
+                "image": "imagr url",
+                "rating": 4.9,
+                "id": "6991383657d0c948e84dd8e0"
+            }
+        ]
+    }
     ```
 
-## **Automated Testing with Playwright**
-The app includes Playwright-based E2E tests located in the tests/ directory.
-Example: login.spec.js covers login functionality with real browser interactions.
+## Running Tests
 
-To run tests locally:
+End-to-end tests are run with Playwright. From the project root:
 
 ```bash
 npx playwright test
 ```
 
+Tests also run automatically on every push via the GitHub Actions CI/CD pipeline.
 
 ## **CI/CD Workflow with GitHub Actions**
 The app includes a GitHub Actions workflow (.github/workflows/ci.yml) that:
-- 1. Triggers on push to main
-- 2. Spins up MongoDB with Docker
-- 3. Installs backend, frontend & Playwright dependencies
-- 4. Starts backend and seeds database
-- 5. Builds & serves the React frontend
-- 6. Waits for both servers to become available
-- 7. Executes Playwright tests in headless Chromium
+1. Triggers on push to main
+2. Spins up MongoDB with Docker
+3. Installs backend, frontend & Playwright dependencies
+4. Starts backend and seeds database
+5. Builds & serves the React frontend
+6. Waits for both servers to become available
+7. Executes Playwright tests in headless Chromium
 
 
 ---

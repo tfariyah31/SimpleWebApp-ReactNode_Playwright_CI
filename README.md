@@ -206,14 +206,11 @@ The app includes a GitHub Actions workflow (.github/workflows/ci.yml) that:
 
 ---
 
+## Author
+**Tasnim Fariyah**
 
-## 👨‍💻 Author
-👤 Tasnim Fariyah
-🔗 [Github](https://github.com/tfariyah31)
-🔗 [LinkedIn](https://www.linkedin.com/in/tasnim-fariyah/)
-
----
-
-Enjoy using the project! 🚀
+[![GitHub](https://img.shields.io/badge/GitHub-tfariyah31-181717?logo=github)](https://github.com/tfariyah31)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-tasnim--fariyah-0A66C2?logo=linkedin)](https://www.linkedin.com/in/tasnim-fariyah/)
 
 ---
+

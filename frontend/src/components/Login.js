@@ -12,7 +12,7 @@ import {
 } from '@mui/material'; // Correct package name
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [attemptsLeft, setAttemptsLeft] = useState(3);
@@ -22,10 +22,10 @@ const Login = () => {
     e.preventDefault();
     setError('');
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+      const response = await fetch('http://127.0.0.1:5001/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json(); // Parse the response body as JSON
@@ -48,7 +48,7 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('token', data.token); // Save the token to localStorage
+      localStorage.setItem('token', data.accessToken); // Save the token to localStorage
       navigate('/products'); // Redirect to the products page
     } catch (err) {
       setError(
@@ -82,11 +82,12 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <TextField
-              label="Username"
+              label="Email"
+              type="email"
               fullWidth
               margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
             <TextField

@@ -26,10 +26,12 @@ const ProductList = () => {
     const fetchProducts = async () => {
       const token = localStorage.getItem('token');
       try {
-        const res = await axios.get('http://127.0.0.1:5000/api/products', {
+        const res = await axios.get('http://127.0.0.1:5001/api/products', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProducts(res.data);
+        // Handle both array and object responses
+        const productsData = Array.isArray(res.data) ? res.data : res.data.products || [];
+        setProducts(productsData);
       } catch (err) {
         setError('Failed to fetch products. Please try again later.');
       } finally {

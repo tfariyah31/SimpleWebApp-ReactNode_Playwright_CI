@@ -57,12 +57,12 @@ npm install
 Create a `.env` file in the `backend` folder:
 
 ```env
-PORT=5000
+PORT=5001
 MONGO_URI=mongodb://localhost:27017/mywebapp
 JWT_SECRET=your_secret_key_here
 ```
 
-> Replace `MONGO_URI` with your MongoDB Atlas connection string if using a cloud database. Use a strong, unique value for `JWT_SECRET` — never commit it to version control.
+> Replace `MONGO_URI` with your MongoDB Atlas connection string if using a cloud database.
 
 Start the backend server:
 

@@ -1,37 +1,70 @@
-# Simple Web Application - React + Node.js
-A full-stack web application with a **React frontend** and **Node.js backend**, featuring user authentication, product listing, CI/CD automation, and end-to-end testing with Playwright.
+# TestMart
 
----
-
-## Features
-
-**Security & Authentication**
-- JWT-based login with `bcryptjs` password hashing
-- Role-based users: `superadmin`, `merchant`, and `customer` with middleware enforcement
-- HTTP header protection via `Helmet` and XSS prevention via `xss-clean`
-- NoSQL injection prevention with `express-mongo-sanitize`
-- Rate limiting to guard against brute-force attacks
-
-**Frontend & UI**
-- Product List Page displaying names, descriptions, ratings, and images
-- Fully responsive UI built with Material-UI (MUI)
-
-**DevOps & Quality Assurance**
-- End-to-end test suite powered by Playwright
-- CI/CD pipeline via GitHub Actions for automated testing and deployment
+A full-stack web application with a React frontend and Node.js backend, featuring role-based user authentication, product management, shopping cart, and user administration.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technologies |
-|-------|-------------|
-| Frontend | React, Material-UI, Axios |
-| Backend | Node.js, Express.js, MongoDB, Mongoose, JWT |
-| Testing | Playwright |
-| CI/CD | GitHub Actions |
+- **Frontend:** React, Material-UI (MUI), React Router
+- **Backend:** Node.js, Express, MongoDB (Mongoose)
+- **Auth:** JWT (access + refresh tokens), bcryptjs
+- **Testing:** Playwright (end-to-end)
+- **CI/CD:** GitHub Actions
 
-## Prerequisites
+---
+
+## Features
+
+### Security & Authentication
+- JWT-based login with short-lived access tokens and long-lived refresh tokens
+- `bcryptjs` password hashing
+- Role-based access control with middleware enforcement (`superadmin`, `merchant`, `customer`)
+- Account lockout after 3 failed login attempts (5-minute lock)
+- HTTP header protection via `Helmet`
+- XSS prevention via `xss-clean`
+- NoSQL injection prevention with `express-mongo-sanitize`
+- Rate limiting to guard against brute-force attacks
+
+### Role-Based Access
+
+#### Super Admin (`superadmin`)
+- Access to all pages and features
+- View all products
+- Add new products
+- Manage all user accounts (update name, email, role, block/unblock)
+- View the Admin Panel with user activity overview
+
+#### Merchant (`merchant`)
+- View all products
+- Add new products (name, description, image, price, rating)
+- Edit existing products
+- Access merchant dashboard with store stats and top products
+
+#### Customer (`customer`)
+- Browse all products
+- Add products to cart
+- View and manage cart (adjust quantities, remove items)
+- View order summary with subtotal, tax, and total
+- Place orders
+- Access customer dashboard with order history and wishlist overview
+
+### Frontend & UI
+- Role-specific dashboards rendered automatically on login
+- Smart navbar with role badge and context-aware links
+- Cart icon with live item count badge (customers only)
+- Fully responsive UI built with Material-UI (MUI)
+- Protected routes — unauthorized roles are redirected automatically
+
+### DevOps & Quality Assurance
+- End-to-end test suite powered by Playwright
+- CI/CD pipeline via GitHub Actions for automated testing and deployment
+
+---
+
+## Getting Started
+
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) v16 or higher
 - [MongoDB](https://www.mongodb.com/try/download/community) (local) or a [MongoDB Atlas](https://www.mongodb.com/atlas) cloud URI
@@ -39,7 +72,6 @@ A full-stack web application with a **React frontend** and **Node.js backend**, 
 
 ---
 
-## Getting Started
 
 ### 1. Clone the Repository
 
@@ -61,8 +93,8 @@ Create a `.env` file in the `backend` folder:
 PORT=5001
 MONGO_URI=mongodb://localhost:27017/mywebapp
 JWT_SECRET=your_secret_key_here
+REFRESH_SECRET=your_refresh_secret
 ```
-
 > Replace `MONGO_URI` with your MongoDB Atlas connection string if using a cloud database.
 
 Start the backend server:
@@ -88,103 +120,53 @@ The frontend will be available at `http://localhost:3000`.
 ```
 my-web-app/
 ├── backend/
-│   ├── config/          # Configuration files
-│   ├── controllers/     # Route controllers
-│   ├── middleware/      # Custom middleware
-│   ├── models/          # MongoDB models
-│   ├── routes/          # API routes
-│   ├── server.js        # Backend entry point
-│   └── .env             # Environment variables
+│   ├── config/          
+│   ├── controllers/     
+│   ├── middleware/      
+│   ├── models/          
+│   ├── routes/          
+│   ├── server.js        
+│   └── .env             
 ├── frontend/
-│   ├── public/          # Static assets
-│   ├── src/             # React components and logic
-│   ├── package.json     # Frontend dependencies
-│   └── ...              # Other frontend files
+│   ├── src/             
+│   ├── utils/             
+│   ├── App.js     
+│   └── ...              
 ├── tests/
-│   ├── login.spec.js    # Playwright Test Script for login funcionality
-├── package.json         # Root project dependencies
-├── playwright.config.js # Playwright Config
-└── README.md            # Project documentation
+│   ├── login.spec.js    
+├── package.json         
+├── playwright.config.js
+└── README.md            
 ```
 
 ---
+## API Endpoints
 
-## **API Endpoints**
-- **POST /api/auth/register**: User registration.
-  - Request Body:  
-    ```json
-    {
-        "name": "Test User",
-        "email": "user@test.com",
-        "password": "password"
-    }
-    ```
-  - Response:
-    ```json
-    {
-        "success": true,
-        "message": "User registered successfully",
-        "id": "699fc2389d80a6b2843f2921",
-        "email": "newuser1772077623999@testmail.com",
-        "emailVerified": false,
-        "name": "TestUser",
-        "isBlocked": false
-    } 
-    ```
+### Auth — `/api/auth`
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| POST | `/login` | Public | Login and receive JWT tokens |
+| POST | `/register` | Public | Register a new customer account |
+| POST | `/refresh` | Public | Refresh access token |
+| POST | `/logout` | Authenticated | Logout and invalidate refresh token |
 
-- **POST /api/auth/login**: User login.
-  - Request Body:
-    ```json
-    {
-      "email": "user@test.com",
-      "password": "testpassword"
-    }
-    ```
-  - Response (includes role):
-    ```json
-    {
-        "success": true,
-        "accessToken": "your-token",
-        "refreshToken": "refresh-token",
-        "user": {
-            "id": "699f9838940ec12f1cbbea76",
-            "email": "user@test.com",
-            "name": "Test User",
-            "role": "customer"
-        }
-    }
-    ```
+### Products — `/api/products`
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/` | All roles | Get all products |
+| GET | `/:id` | All roles | Get single product |
+| POST | `/` | Merchant, Super Admin | Add a new product |
+| PUT | `/:id` | Merchant, Super Admin | Update a product |
+| DELETE | `/:id` | Merchant, Super Admin | Delete a product |
 
-- **Products endpoints**: only `merchant` and `superadmin` roles may create/update/delete. Customers can only read.
+### Users — `/api/users`
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| GET | `/` | Super Admin | Get all users |
+| GET | `/:id` | Super Admin | Get single user |
+| PUT | `/:id` | Super Admin | Update user info, role, or block status |
 
-- **GET /api/products**: Fetch product list (requires authentication). Seed script adds a `superadmin`, a `merchant`, a `customer`, and a blocked customer.  - Headers:
-    ```json
-    {
-      "Authorization": "Bearer <your-jwt-token>"
-    }
-    ```
-  - Response:
-    ```json
-    {
-        "success": true,
-        "products": [
-            {
-                "name": "Product A",
-                "description": "desc",
-                "image": "image url",
-                "rating": 4.8,
-                "id": "6991383657d0c948e84dd8df"
-            },
-            {
-                "name": "Product B",
-                "description": "desc",
-                "image": "imagr url",
-                "rating": 4.9,
-                "id": "6991383657d0c948e84dd8e0"
-            }
-        ]
-    }
-    ```
+---
 
 ## Running Tests
 

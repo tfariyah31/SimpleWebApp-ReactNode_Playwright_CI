@@ -7,6 +7,7 @@ A full-stack web application with a **React frontend** and **Node.js backend**, 
 
 **Security & Authentication**
 - JWT-based login with `bcryptjs` password hashing
+- Role-based users: `superadmin`, `merchant`, and `customer` with middleware enforcement
 - HTTP header protection via `Helmet` and XSS prevention via `xss-clean`
 - NoSQL injection prevention with `express-mongo-sanitize`
 - Rate limiting to guard against brute-force attacks
@@ -139,7 +140,7 @@ my-web-app/
       "password": "testpassword"
     }
     ```
-  - Response:
+  - Response (includes role):
     ```json
     {
         "success": true,
@@ -148,13 +149,15 @@ my-web-app/
         "user": {
             "id": "699f9838940ec12f1cbbea76",
             "email": "user@test.com",
-            "name": "Test User"
+            "name": "Test User",
+            "role": "customer"
         }
     }
     ```
 
-- **GET /api/products**: Fetch product list (requires authentication).
-  - Headers:
+- **Products endpoints**: only `merchant` and `superadmin` roles may create/update/delete. Customers can only read.
+
+- **GET /api/products**: Fetch product list (requires authentication). Seed script adds a `superadmin`, a `merchant`, a `customer`, and a blocked customer.  - Headers:
     ```json
     {
       "Authorization": "Bearer <your-jwt-token>"

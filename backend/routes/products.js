@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require('../models/Product');
 const { getProducts } = require('../controllers/products');
 const authMiddleware = require('../middleware/auth');
+const { requireRole } = authMiddleware; // helper for role-based access
 
 
 router.get('/', authMiddleware, async (req, res) => {
@@ -27,8 +28,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Create product (protected)
-router.post('/', authMiddleware, async (req, res) => {
+// Create product (merchant+ only)
+router.post('/', authMiddleware, requireRole('merchant','superadmin'), async (req, res) => {
     try {
         const product = new Product(req.body);
         await product.save();
@@ -38,8 +39,8 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-// Update product (protected)
-router.put('/:id', authMiddleware, async (req, res) => {
+// Update product (merchant+ only)
+router.put('/:id', authMiddleware, requireRole('merchant','superadmin'), async (req, res) => {
     try {
         const product = await Product.findByIdAndUpdate(
             req.params.id, 
@@ -55,8 +56,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// Delete product (protected)
-router.delete('/:id', authMiddleware, async (req, res) => {
+// Delete product (merchant+ only)
+router.delete('/:id', authMiddleware, requireRole('merchant','superadmin'), async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {

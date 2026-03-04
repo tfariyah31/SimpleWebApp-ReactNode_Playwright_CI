@@ -48,8 +48,12 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem('token', data.accessToken); // Save the token to localStorage
-      navigate('/products'); // Redirect to the products page
+      // Save authentication info
+      localStorage.setItem('accessToken', data.accessToken);
+      if (data.user && data.user.role) {
+        localStorage.setItem('userRole', data.user.role);
+      }
+      navigate('/dashboard'); // Redirect to the dashboard page
     } catch (err) {
       setError(
         err.res?.data?.message ||

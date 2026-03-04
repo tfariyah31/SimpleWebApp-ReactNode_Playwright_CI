@@ -42,6 +42,7 @@ router.post('/register', validateRegister, async (req, res) => {
             name,
             email,
             password,
+            role: 'customer', // new role-based default
             isBlocked: false // default value
         });
 
@@ -58,6 +59,7 @@ router.post('/register', validateRegister, async (req, res) => {
             email: user.email,
             emailVerified: false,
             name: user.name,
+            role: user.role,
             isBlocked: user.isBlocked
         });
 

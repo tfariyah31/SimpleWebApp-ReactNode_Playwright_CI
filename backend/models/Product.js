@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  price: { type: Number, default: 0 },
   rating: { type: Number, required: true },
 }, {
   timestamps: true, // Adds createdAt and updatedAt

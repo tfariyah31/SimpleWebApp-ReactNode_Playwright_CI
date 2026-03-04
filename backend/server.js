@@ -6,6 +6,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const sanitize = require('./middleware/sanitize');
+const userRoutes = require('./routes/users');
+
 
 dotenv.config();
 
@@ -49,6 +51,8 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
+
+app.use('/api/users', userRoutes);
 
 
 app.listen(PORT, () => {

@@ -18,22 +18,28 @@ const seed = async () => {
     // Create all users
     const users = [
       {
-        name: 'System Admin',
-        email: 'sysadmin@test.com',
+        name: 'Super Admin',
+        email: 'superadmin@test.com',
         password: 'Str0ng!Pass#2024',
-        role: 'admin'
+        role: 'superadmin'
       },
       {
-        name: 'Regular User',
-        email: 'user@test.com',
-        password: 'UserPass123!',
-        role: 'user'
+        name: 'Merchant User',
+        email: 'merchant@test.com',
+        password: 'MerchantPass123!',
+        role: 'merchant'
       },
       {
-        name: 'Blocked User',
+        name: 'Customer User',
+        email: 'customer@test.com',
+        password: 'CustomerPass123!',
+        role: 'customer'
+      },
+      {
+        name: 'Blocked Customer',
         email: 'blocked@test.com',
         password: 'BlockedPass123!',
-        role: 'user',
+        role: 'customer',
         isBlocked: true
       }
     ];
@@ -58,8 +64,9 @@ const seed = async () => {
       
       // Test password verification for each user
       let testPassword;
-      if (dbUser.email === 'sysadmin@test.com') testPassword = 'Str0ng!Pass#2024';
-      else if (dbUser.email === 'user@test.com') testPassword = 'UserPass123!';
+      if (dbUser.email === 'superadmin@test.com') testPassword = 'Str0ng!Pass#2024';
+      else if (dbUser.email === 'merchant@test.com') testPassword = 'MerchantPass123!';
+      else if (dbUser.email === 'customer@test.com') testPassword = 'CustomerPass123!';
       else if (dbUser.email === 'blocked@test.com') testPassword = 'BlockedPass123!';
       
       const isMatch = await bcrypt.compare(testPassword, dbUser.password);

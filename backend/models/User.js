@@ -6,6 +6,14 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true, lowercase: true, trim: true },
   password: { type: String, required: true },
+
+  // role-based access control: default to customer
+  role: { 
+    type: String, 
+    enum: ['superadmin', 'merchant', 'customer'], 
+    default: 'customer' 
+  },
+
   isBlocked: { type: Boolean, default: false },
 
   failedLoginAttempts: { type: Number, default: 0 },

@@ -2,16 +2,17 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const generateTokens = (userId) => {
+// embed role in the token so middleware can authorize without extra DB lookup
+const generateTokens = (userId, role) => {
     const accessToken = jwt.sign(
-        { userId },
-        process.env.JWT_SECRET || 'access-secret',
-        { expiresIn: '15m' } // Short-lived
+        { userId, role },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' } // Short-lived
     );
     
     const refreshToken = jwt.sign(
-        { userId },
-        process.env.REFRESH_SECRET || 'refresh-secret',
+        { userId, role },
+        process.env.REFRESH_SECRET,
         { expiresIn: '7d' } // Long-lived
     );
     
@@ -24,13 +25,14 @@ exports.register = async (req, res) => {
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ message: 'User already exists' });
 
-    user = new User({ name, email, password });
+    // always default to 'customer' on registration; role assignment is done by admins
+    user = new User({ name, email, password, role: 'customer' });
     await user.save();
 
-    const payload = { userId: user.id };
+    const payload = { userId: user.id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.status(201).json({ token });
+    res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name, role: user.role } });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -90,7 +92,7 @@ exports.login = async (req, res) => {
     user.failedLoginAttempts = 0;
     user.lockUntil = null;
 
-    const { accessToken, refreshToken } = generateTokens(user._id);
+    const { accessToken, refreshToken } = generateTokens(user._id, user.role);
 
     user.refreshTokens = user.refreshTokens || [];
     user.refreshTokens.push({
@@ -105,7 +107,7 @@ exports.login = async (req, res) => {
       success: true,
       accessToken,
       refreshToken,
-      user: { id: user._id, email: user.email, name: user.name }
+      user: { id: user._id, email: user.email, name: user.name, role: user.role }
     });
 
   } catch (err) {
@@ -136,7 +138,7 @@ exports.refreshToken = async (req, res) => {
         }
         
         // Generate new tokens
-        const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id);
+        const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id, user.role);
         
         // Remove old refresh token and add new one
         user.refreshTokens = user.refreshTokens.filter(t => t.token !== refreshToken);

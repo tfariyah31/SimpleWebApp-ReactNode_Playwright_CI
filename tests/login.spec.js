@@ -24,6 +24,35 @@ test.describe('Login Flow', () => {
 
       });
 
+  test('login response contains role and products endpoint respects role', async ({ request }) => {
+    // perform login via API rather than UI
+    const loginRes = await request.post('http://localhost:5001/api/auth/login', {
+      data: { email: 'merchant@test.com', password: 'MerchantPass123!' }
+    });
+    expect(loginRes.ok()).toBeTruthy();
+    const loginData = await loginRes.json();
+    expect(loginData.user).toBeDefined();
+    expect(loginData.user.role).toBe('merchant');
+
+    // merchant should be allowed to create a product
+    const createRes = await request.post('http://localhost:5001/api/products', {
+      data: { name: 'TestProd', description: 'desc', image: '', price: 1 },
+      headers: { Authorization: `Bearer ${loginData.accessToken}` }
+    });
+    expect(createRes.status()).not.toBe(403);
+
+    // now try as customer and ensure forbidden
+    const customerLogin = await request.post('http://localhost:5001/api/auth/login', {
+      data: { email: 'customer@test.com', password: 'CustomerPass123!' }
+    });
+    const customerData = await customerLogin.json();
+    const custCreate = await request.post('http://localhost:5001/api/products', {
+      data: { name: 'Nope', description: '', image: '', price: 0 },
+      headers: { Authorization: `Bearer ${customerData.accessToken}` }
+    });
+    expect(custCreate.status()).toBe(403);
+  });
+
 /*  test('should show error on invalid credentials', async ({ page }) => {
     await page.goto('http://127.0.0.1:3000');
 

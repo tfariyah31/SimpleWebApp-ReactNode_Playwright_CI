@@ -76,8 +76,8 @@ A full-stack web application with a React frontend and Node.js backend, featurin
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/tfariyah31/SimpleWebApp.git
-cd SimpleWebApp
+git clone https://github.com/tfariyah31/TestMart-ReactNode_Playwright_CI.git
+cd TestMart
 ```
 
 ### 2. Set Up the Backend
@@ -118,7 +118,7 @@ The frontend will be available at `http://localhost:3000`.
 ---
 ## **Project Structure**
 ```
-my-web-app/
+TestMart/
 ├── backend/
 │   ├── config/          
 │   ├── controllers/     

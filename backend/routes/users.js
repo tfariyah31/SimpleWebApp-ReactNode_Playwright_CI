@@ -4,6 +4,10 @@ const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const { requireRole } = authMiddleware;
 
+function isInvalidObjectId(err) {
+  return err.name === 'CastError' && err.path === '_id';
+}
+
 // GET all users — superadmin only
 router.get('/', authMiddleware, requireRole('superadmin'), async (req, res) => {
   try {
@@ -21,6 +25,9 @@ router.get('/:id', authMiddleware, requireRole('superadmin'), async (req, res) =
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, user });
   } catch (err) {
+    if (isInvalidObjectId(err)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -54,8 +61,15 @@ router.put('/:id', authMiddleware, requireRole('superadmin'), async (req, res) =
 
     res.json({ success: true, user });
   } catch (err) {
+    if (isInvalidObjectId(err)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ success: false, message: messages.join(', ') });
+    }
     if (err.code === 11000) {
-      return res.status(400).json({ success: false, message: 'Email already in use by another account' });
+      return res.status(409).json({ success: false, message: 'Email already in use by another account' });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }

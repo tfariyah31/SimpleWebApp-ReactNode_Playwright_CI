@@ -72,14 +72,7 @@ router.post('/register', validateRegister, async (req, res) => {
     }
 });
 
-router.post('/logout' , authMiddleware, async (req, res) => { 
-    try {
-      res.status(200).json({ message: 'Logged out successfully' });
-    } catch (err) {
-      res.status(500).json({ message: 'Logout failed' });
-    }
-});
-
+router.post('/logout' , authMiddleware,authController.logout);
 
 router.post('/refresh', authController.refreshToken);
 

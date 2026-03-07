@@ -125,7 +125,7 @@ exports.refreshToken = async (req, res) => {
         }
         
         // Verify refresh token
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET || 'refresh-secret');
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
         
         // Find user with this refresh token
         const user = await User.findOne({

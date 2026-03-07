@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
 
   name: { type: String, required: true },
-  email: { type: String, unique: true, required: true, lowercase: true, trim: true },
+  email: { type: String, unique: true, required: true, lowercase: true, trim: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please provide a valid email address'], },
   password: { type: String, required: true },
 
   // role-based access control: default to customer

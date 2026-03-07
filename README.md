@@ -143,6 +143,7 @@ TestMart/
 ## API Endpoints
 
 ### Auth — `/api/auth`
+
 | Method | Endpoint | Access | Description |
 |--------|----------|--------|-------------|
 | POST | `/login` | Public | Login and receive JWT tokens |
@@ -151,6 +152,7 @@ TestMart/
 | POST | `/logout` | Authenticated | Logout and invalidate refresh token |
 
 ### Products — `/api/products`
+
 | Method | Endpoint | Access | Description |
 |--------|----------|--------|-------------|
 | GET | `/` | All roles | Get all products |
@@ -160,6 +162,7 @@ TestMart/
 | DELETE | `/:id` | Merchant, Super Admin | Delete a product |
 
 ### Users — `/api/users`
+
 | Method | Endpoint | Access | Description |
 |--------|----------|--------|-------------|
 | GET | `/` | Super Admin | Get all users |
@@ -168,25 +171,37 @@ TestMart/
 
 ---
 
-## Running Tests
+## Playwright Tests
 
-End-to-end tests are run with Playwright. From the project root:
+### API Tests Prerequisites
+
+- Backend server running at `http://127.0.0.1:5001`
+- Test users seeded in MongoDB — run `npm run seed:test` if not done yet
+
+## Running the Tests
+
+Global setup (`tests/global.setup.ts`) runs **automatically** before the tests. It logs in as each role (`superadmin`, `merchant`, `customer`) and saves session tokens to `.sessions/` for reuse across all tests.
 
 ```bash
-npx playwright test
+npm run test:api
 ```
+Re-run this any time your tokens expire or you reseed the database.
 
-Tests also run automatically on every push via the GitHub Actions CI/CD pipeline.
 
-## **CI/CD Workflow with GitHub Actions**
-The app includes a GitHub Actions workflow (.github/workflows/ci.yml) that:
-1. Triggers on push to main
-2. Spins up MongoDB with Docker
-3. Installs backend, frontend & Playwright dependencies
-4. Starts backend and seeds database
-5. Builds & serves the React frontend
-6. Waits for both servers to become available
-7. Executes Playwright tests in headless Chromium
+## Test Coverage
+
+| Spec file | Endpoints |
+|---|---|
+| `auth.api.spec.ts` | `POST /api/auth/login`, `/register`, `/refresh`, `/logout` |
+| `users.api.spec.ts` | `GET /api/users`, `GET /api/users/:id`, `PUT /api/users/:id` |
+| `products.api.spec.ts` | `GET /api/products`, `GET /api/products/:id`, `POST`, `PUT`, `DELETE` |
+
+## Notes
+
+- Tests are **read-only safe** — any products created during testing are cleaned up via `afterAll`
+- Blocked/locked user credentials are available via `getCredentials('blockedUser')` in `fixtures/auth.fixture.ts` for scenario-specific tests
+
+
 
 
 ---

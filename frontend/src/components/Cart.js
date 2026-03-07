@@ -11,6 +11,8 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { getCart, removeFromCart, updateQuantity, clearCart } from '../utils/cart';
+import CheckoutPayment from './CheckoutPayment';
+
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -186,14 +188,13 @@ const Cart = () => {
                     <Typography variant="body1" fontWeight={700} color="#047857">${total.toFixed(2)}</Typography>
                   </Box>
 
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={handleCheckout}
-                    sx={{ background: '#047857', textTransform: 'none', fontWeight: 600, py: 1.5, '&:hover': { background: '#065f46' } }}
-                  >
-                    Place Order
-                  </Button>
+                  <CheckoutPayment
+                    cartTotal={total}
+                    onSuccess={(paymentIntent) => {
+                    handleCheckout();
+                    }}
+                    onError={(msg) => console.error('Payment failed:', msg)}
+                  />
                   <Button
                     fullWidth
                     variant="text"

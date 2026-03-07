@@ -1,15 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+dotenv.config();
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const sanitize = require('./middleware/sanitize');
 const userRoutes = require('./routes/users');
+const paymentRoutes = require('./routes/payments');
 
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -53,6 +54,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 
 app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
 
 
 app.listen(PORT, () => {

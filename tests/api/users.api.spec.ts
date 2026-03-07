@@ -1,14 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { getSession, getCredentials, authHeader, TEST_USERS } from '../fixtures/auth.fixture';
+import { getSession, authHeader, TEST_USERS } from '../fixtures/auth.fixture';
 
 /**
  * Users API Tests
  * GET  /api/users/     — Super Admin: get all users
  * GET  /api/users/:id  — Super Admin: get single user
  * PUT  /api/users/:id  — Super Admin: update user name or email
+ *
+ * NOTE: PUT tests never touch seeded users (customer@test.com etc.).
+ * Each PUT describe block registers a fresh disposable user in beforeAll
+ * and deletes them in afterAll.
  */
 
 const BASE_URL = 'http://127.0.0.1:5001/api/users';
+const AUTH_URL = 'http://127.0.0.1:5001/api/auth';
 
 // ---------------------------------------------------------------------------
 // Helper — asserts the shape of a user object and that password is never leaked
@@ -22,6 +27,16 @@ function expectUserShape(user: any) {
   expect(user).toHaveProperty('isBlocked');
   expect(user.password).toBeUndefined();
 }
+
+// ---------------------------------------------------------------------------
+// Disposable user factory — unique timestamp per call, never conflicts with seed data
+// ---------------------------------------------------------------------------
+
+const disposableUser = () => ({
+  name: 'Disposable Test User',
+  email: `disposable_${Date.now()}@testmart.com`,
+  password: 'Disposable@1234',
+});
 
 // ---------------------------------------------------------------------------
 // GET /api/users  — Get all users
@@ -53,7 +68,8 @@ test.describe('GET /api/users', () => {
     });
 
     expect(res.status()).toBe(200);
-    const users: any[] = (await res.json()).users ?? (await res.json());
+    const body = await res.json();
+    const users: any[] = body.users ?? body;
     users.forEach((u) =>
       expect(['superadmin', 'merchant', 'customer']).toContain(u.role)
     );
@@ -100,7 +116,8 @@ test.describe('GET /api/users/:id', () => {
 
     expect(res.status()).toBe(200);
 
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expectUserShape(user);
     expect(user._id).toBe(session.user.id);
     expect(user.email).toBe(TEST_USERS.customer.email);
@@ -115,7 +132,8 @@ test.describe('GET /api/users/:id', () => {
 
     expect(res.status()).toBe(200);
 
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expectUserShape(user);
     expect(user.role).toBe('merchant');
   });
@@ -127,7 +145,8 @@ test.describe('GET /api/users/:id', () => {
       headers: authHeader('superadmin'),
     });
 
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expect(['superadmin', 'merchant', 'customer']).toContain(user.role);
   });
 
@@ -147,24 +166,23 @@ test.describe('GET /api/users/:id', () => {
 
   test('[USR-015] Returns 401 when no token is provided', async ({ request }) => {
     const session = getSession('customer');
-
     const res = await request.get(`${BASE_URL}/${session.user.id}`);
     expect([401, 403]).toContain(res.status());
   });
 
   test('[USR-016] Returns 403 when accessed by a merchant', async ({ request }) => {
-    const customerSession = getSession('customer');
+    const session = getSession('customer');
 
-    const res = await request.get(`${BASE_URL}/${customerSession.user.id}`, {
+    const res = await request.get(`${BASE_URL}/${session.user.id}`, {
       headers: authHeader('merchant'),
     });
     expect([401, 403]).toContain(res.status());
   });
 
   test('[USR-017] Returns 403 when accessed by a customer', async ({ request }) => {
-    const customerSession = getSession('customer');
+    const session = getSession('customer');
 
-    const res = await request.get(`${BASE_URL}/${customerSession.user.id}`, {
+    const res = await request.get(`${BASE_URL}/${session.user.id}`, {
       headers: authHeader('customer'),
     });
     expect([401, 403]).toContain(res.status());
@@ -177,173 +195,212 @@ test.describe('GET /api/users/:id', () => {
       headers: authHeader('superadmin'),
     });
 
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expect(user.password).toBeUndefined();
   });
 });
 
 // ---------------------------------------------------------------------------
-// PUT /api/users/:id  — Update name
+// PUT /api/users/:id — Update name
+// Uses a fresh disposable user. Seed data is never touched.
 // ---------------------------------------------------------------------------
 
 test.describe('PUT /api/users/:id — Update name', () => {
+  let testUserId: string;
+
+  test.beforeAll(async ({ request }) => {
+    const res = await request.post(`${AUTH_URL}/register`, {
+      data: disposableUser(),
+    });
+    expect(res.status(), 'disposable user registration failed').toBe(201);
+    const body = await res.json();
+    
+    testUserId = body.id || body._id || body.user?.id || body.user?._id;
+    expect(testUserId, 'could not read created user ID from register response').toBeTruthy();
+  });
+
+  test.afterAll(async ({ request }) => {
+    if (testUserId) {
+      await request.delete(`${BASE_URL}/${testUserId}`, {
+        headers: authHeader('superadmin'),
+      });
+    }
+  });
+
   test('[USR-020] Super admin can update a user name', async ({ request }) => {
-    const session = getSession('customer');
     const updatedName = `Updated Name ${Date.now()}`;
 
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { name: updatedName },
     });
 
     expect(res.status()).toBe(200);
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expect(user.name).toBe(updatedName);
   });
 
   test('[USR-021] Updated user response has correct shape and no password', async ({
     request,
   }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { name: `Shape Check ${Date.now()}` },
     });
 
     expect(res.status()).toBe(200);
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expectUserShape(user);
   });
 
   test('[USR-022] Returns 400 when name is an empty string', async ({ request }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { name: '' },
     });
-
     expect([400, 422]).toContain(res.status());
   });
 
   test('[USR-023] Returns 400 when name is only whitespace', async ({ request }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { name: '   ' },
     });
-
     expect([400, 422]).toContain(res.status());
   });
 });
 
 // ---------------------------------------------------------------------------
-// PUT /api/users/:id  — Update email
+// PUT /api/users/:id — Update email
+// Uses a fresh disposable user. Seed data is never touched.
 // ---------------------------------------------------------------------------
 
 test.describe('PUT /api/users/:id — Update email', () => {
+  let testUserId: string;
+
+  test.beforeAll(async ({ request }) => {
+    const res = await request.post(`${AUTH_URL}/register`, {
+      data: disposableUser(),
+    });
+    expect(res.status(), 'disposable user registration failed').toBe(201);
+    const body = await res.json();
+    
+    testUserId = body.id || body._id || body.user?.id || body.user?._id;
+    expect(testUserId, 'could not read created user ID from register response').toBeTruthy();
+  });
+
+  test.afterAll(async ({ request }) => {
+    if (testUserId) {
+      await request.delete(`${BASE_URL}/${testUserId}`, {
+        headers: authHeader('superadmin'),
+      });
+    }
+  });
+
   test('[USR-030] Super admin can update a user email', async ({ request }) => {
-    const session = getSession('customer');
     const updatedEmail = `updated_${Date.now()}@testmart.com`;
 
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { email: updatedEmail },
     });
 
     expect(res.status()).toBe(200);
-    const user = (await res.json()).user ?? (await res.json());
+    const body = await res.json();
+    const user = body.user ?? body;
     expect(user.email).toBe(updatedEmail);
   });
 
   test('[USR-031] Returns 400 when email has an invalid format', async ({ request }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { email: 'not-an-email' },
     });
-
     expect([400, 422]).toContain(res.status());
   });
 
   test('[USR-032] Returns 400 when email is an empty string', async ({ request }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { email: '' },
     });
-
     expect([400, 422]).toContain(res.status());
   });
 
   test('[USR-033] Returns 409 when email is already taken by another user', async ({
     request,
   }) => {
-    const session = getSession('customer');
-
-    // Try to assign the merchant's existing email to the customer account
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    // Attempts to assign an existing seeded email — read-only reference, no seed mutation
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('superadmin'),
       data: { email: TEST_USERS.merchant.email },
     });
-
     expect([400, 409, 422]).toContain(res.status());
   });
 });
 
 // ---------------------------------------------------------------------------
-// PUT /api/users/:id  — Auth & not-found guards
+// PUT /api/users/:id — Auth & not-found guards
+// Uses a fresh disposable user. Seed data is never touched.
 // ---------------------------------------------------------------------------
 
 test.describe('PUT /api/users/:id — Auth & not-found guards', () => {
-  test('[USR-040] Returns 401 when no token is provided', async ({ request }) => {
-    const session = getSession('customer');
+  let testUserId: string;
 
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+  test.beforeAll(async ({ request }) => {
+    const res = await request.post(`${AUTH_URL}/register`, {
+      data: disposableUser(),
+    });
+    expect(res.status(), 'disposable user registration failed').toBe(201);
+    const body = await res.json();
+    
+    testUserId = body.id || body._id || body.user?.id || body.user?._id;
+    expect(testUserId, 'could not read created user ID from register response').toBeTruthy();
+  });
+
+  test.afterAll(async ({ request }) => {
+    if (testUserId) {
+      await request.delete(`${BASE_URL}/${testUserId}`, {
+        headers: authHeader('superadmin'),
+      });
+    }
+  });
+
+  test('[USR-040] Returns 401 when no token is provided', async ({ request }) => {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       data: { name: 'Ghost User' },
     });
-
     expect([401, 403]).toContain(res.status());
   });
 
   test('[USR-041] Returns 401 with an invalid token', async ({ request }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: { Authorization: 'Bearer badtoken' },
       data: { name: 'Ghost User' },
     });
-
     expect([401, 403]).toContain(res.status());
   });
 
   test('[USR-042] Returns 403 when a merchant attempts to update a user', async ({
     request,
   }) => {
-    const session = getSession('customer');
-
-    const res = await request.put(`${BASE_URL}/${session.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('merchant'),
       data: { name: 'Sneaky Merchant' },
     });
-
     expect([401, 403]).toContain(res.status());
   });
 
   test('[USR-043] Returns 403 when a customer attempts to update another user', async ({
     request,
   }) => {
-    const merchantSession = getSession('merchant');
-
-    const res = await request.put(`${BASE_URL}/${merchantSession.user.id}`, {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
       headers: authHeader('customer'),
       data: { name: 'Sneaky Customer' },
     });
-
     expect([401, 403]).toContain(res.status());
   });
 
@@ -352,7 +409,6 @@ test.describe('PUT /api/users/:id — Auth & not-found guards', () => {
       headers: authHeader('superadmin'),
       data: { name: 'Nobody' },
     });
-
     expect(res.status()).toBe(404);
   });
 
@@ -361,7 +417,18 @@ test.describe('PUT /api/users/:id — Auth & not-found guards', () => {
       headers: authHeader('superadmin'),
       data: { name: 'Nobody' },
     });
-
     expect([400, 404, 422]).toContain(res.status());
+  });
+
+  test('[USR-046] Update response never exposes the user password', async ({ request }) => {
+    const res = await request.put(`${BASE_URL}/${testUserId}`, {
+      headers: authHeader('superadmin'),
+      data: { name: `Safe Name ${Date.now()}` },
+    });
+
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    const user = body.user ?? body;
+    expect(user.password).toBeUndefined();
   });
 });

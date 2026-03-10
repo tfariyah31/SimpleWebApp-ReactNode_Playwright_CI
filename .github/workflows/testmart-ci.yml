@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Job 1 — Backend unit & integration checks
+  # Job 1 — Backend checks
   # ---------------------------------------------------------------------------
   backend:
     name: Backend
@@ -30,6 +30,7 @@ jobs:
       MONGO_URI: mongodb://localhost:27017/testmart_ci
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     steps:
       - name: Checkout code
@@ -77,6 +78,7 @@ jobs:
       MONGO_URI: mongodb://localhost:27017/testmart_ci
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       REFRESH_SECRET: ${{ secrets.REFRESH_SECRET }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
     steps:
       - name: Checkout code
@@ -119,7 +121,7 @@ jobs:
           retention-days: 14
 
   # ---------------------------------------------------------------------------
-  # Job 3 — Frontend build check
+  # Job 3 — Frontend build check (no Stripe keys needed)
   # ---------------------------------------------------------------------------
   frontend:
     name: Frontend Build

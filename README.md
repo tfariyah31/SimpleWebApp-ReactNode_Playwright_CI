@@ -201,9 +201,6 @@ Re-run this any time your tokens expire or you reseed the database.
 - Tests are **read-only safe** — any products created during testing are cleaned up via `afterAll`
 - Blocked/locked user credentials are available via `getCredentials('blockedUser')` in `fixtures/auth.fixture.ts` for scenario-specific tests
 
-
-
-
 ---
 
 ## Author

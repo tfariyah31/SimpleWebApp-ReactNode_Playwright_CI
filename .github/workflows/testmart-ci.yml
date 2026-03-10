@@ -105,7 +105,7 @@ jobs:
 
       - name: Seed test users
         working-directory: backend
-        run: npm run seed:test
+        run: node seedUser.js
 
       - name: Run Playwright API tests
         run: npm run test:api

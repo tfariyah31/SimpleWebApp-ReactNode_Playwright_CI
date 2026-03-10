@@ -25,6 +25,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to the backend server!');
 });
 
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true });
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());

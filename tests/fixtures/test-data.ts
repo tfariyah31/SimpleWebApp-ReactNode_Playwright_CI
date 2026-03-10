@@ -17,6 +17,12 @@ export const TEST_USERS = {
     role: 'merchant',
     name: 'Test Merchant',
   },
+  validationuser:{
+    email: 'validation@test.com',
+    password: 'ValidationPass123!',
+    role: 'customer',
+    name: 'Validation User',
+  },
   customer: {
     email: 'customer@test.com',
     password: 'CustomerPass123!',

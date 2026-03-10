@@ -36,6 +36,12 @@ const seed = async () => {
         role: 'customer'
       },
       {
+        name: 'Validation User',
+        email: 'validation@test.com',
+        password: 'ValidationPass123!',
+        role: 'customer'
+      },
+      {
         name: 'Blocked Customer',
         email: 'blocked@test.com',
         password: 'BlockedPass123!',
@@ -67,6 +73,7 @@ const seed = async () => {
       if (dbUser.email === 'superadmin@test.com') testPassword = 'Str0ng!Pass#2024';
       else if (dbUser.email === 'merchant@test.com') testPassword = 'MerchantPass123!';
       else if (dbUser.email === 'customer@test.com') testPassword = 'CustomerPass123!';
+      else if (dbUser.email === 'validation@test.com') testPassword = 'ValidationPass123!';
       else if (dbUser.email === 'blocked@test.com') testPassword = 'BlockedPass123!';
       
       const isMatch = await bcrypt.compare(testPassword, dbUser.password);

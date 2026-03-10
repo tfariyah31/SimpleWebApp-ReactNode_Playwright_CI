@@ -37,12 +37,13 @@ test.describe('POST /api/auth/login', () => {
   });
 
   test('[LG-002] Should return 401 with wrong password', async ({ request }) => {
-    const session = getSession('superadmin');
-    const res = await request.post(`${BASE_URL}/login`, {
-      data: { email: session.user.email, password: 'WrongPassword!' },
-    });
-    const body = await res.json();
+    const { email } = getCredentials('validationuser');
 
+    const res = await request.post(`${BASE_URL}/login`, {
+      data: { email, password: 'WrongPassword!' },
+    });
+
+    const body = await res.json();
     expect(res.status()).toBe(401);
     expect(body.success).toBe(false);
   });
@@ -105,9 +106,9 @@ test('[LG-005] Should return 403 Forbidden for a blocked user', async ({ request
   });
 
   test('[LG-007] Should return 400 when password is missing', async ({ request }) => {
-    const session = getSession('superadmin');
+    const { email } = getCredentials('validationuser');
     const res = await request.post(`${BASE_URL}/login`, {
-      data: { email: session.user.email },
+       data: { email }, 
     });
 
     expect(res.status()).toBe(400);

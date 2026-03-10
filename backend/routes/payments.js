@@ -1,8 +1,7 @@
-// routes/payments.js
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const protect = require('../middleware/auth'); // adjust to your auth middleware path
+const protect = require('../middleware/auth'); 
 
 /**
  * POST /api/payments/create-intent
@@ -23,6 +22,14 @@ router.post('/create-intent', protect, async (req, res) => {
     // ── Validation ────────────────────────────────────────────────────────────
     if (amount === undefined || amount === null) {
       return res.status(400).json({ message: 'amount is required' });
+    }
+
+    if (Array.isArray(amount) || typeof amount === 'object') {
+      return res.status(400).json({ message: 'amount must be a number' });
+    }
+
+    if (typeof amount !== 'number' || !isFinite(amount)) {
+      return res.status(400).json({ message: 'amount must be a valid number' });
     }
 
     const parsedAmount = parseFloat(amount);

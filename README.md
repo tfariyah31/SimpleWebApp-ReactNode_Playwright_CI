@@ -33,7 +33,6 @@ A full-stack web application with a React frontend and Node.js backend, featurin
 - View all products
 - Add new products
 - Manage all user accounts (update name, email, role, block/unblock)
-- View the Admin Panel with user activity overview
 
 #### Merchant (`merchant`)
 - View all products
@@ -46,9 +45,19 @@ A full-stack web application with a React frontend and Node.js backend, featurin
 - Add products to cart
 - View and manage cart (adjust quantities, remove items)
 - View order summary with subtotal, tax, and total
-- Place orders
+- Secure checkout with Stripe Sandbox payment integration
+- Place orders after successful payment
 - Access customer dashboard with order history and wishlist overview
 
+
+#### Payment Integration
+- Integrated Stripe Sandbox for secure test payments
+- Customers can complete checkout using Stripe’s payment flow
+- Payment confirmation before order creation
+- Simulated real-world e-commerce payment processing
+- Supports testing with Stripe test cards
+- Designed to enable automated payment flow testing
+  
 ### Frontend & UI
 - Role-specific dashboards rendered automatically on login
 - Smart navbar with role badge and context-aware links
